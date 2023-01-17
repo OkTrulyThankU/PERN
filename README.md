@@ -3,7 +3,7 @@
 This is webapp boilerplate for PERN beginner.
 
 ## What is the PERN :grey_question:
-:earth_asia: PostgreSQL, Expless, React and Node.js is very popular laguage collabolation for web developer.   
+:earth_asia: PostgreSQL, Expless, React and Node.js is very popular stack for web developer.   
 :+1: If you choise PERN, you will get the fast develop experience with light code and fast working speed.
 
 ## Branch Naming Guide
