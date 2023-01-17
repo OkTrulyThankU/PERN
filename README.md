@@ -14,7 +14,7 @@ This is webapp boilerplate for PERN beginner.
 5. feature-{issue-number}-{feature-name}: ex) Feature-1.2-login
 
 ## Usage
-After clone and enter `npm init` this command in terminer.
+After clone and typing `npm init` this command in terminer.
 Its over. so easy. If you wanna know that means, Read `package.json` file.
 
 ### Liked the work?
