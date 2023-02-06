@@ -9,7 +9,7 @@ CREATE DATABASE pozaang;
 
 -- make table
 CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
+  user_id SERIAL PRIMARY KEY,
   username VARCHAR(50) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
@@ -22,8 +22,20 @@ comment on column users.email is '이메일';
 comment on column users.first_name is '이름';
 comment on column users.last_name is '성';
 
+CREATE TABLE preferences (
+    preference_id serial PRIMARY KEY,
+    size VARCHAR(255),
+    color VARCHAR(255),
+    style VARCHAR(255),
+    price VARCHAR(255),
+    category_id INTEGER NOT NULL,
+    FOREIGN KEY (category_id) REFERENCES categories(category_id),
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
 CREATE TABLE addresses (
-    id serial PRIMARY KEY,
+    address_id serial PRIMARY KEY,
     recipient_name VARCHAR(255) NOT NULL,
     phone_number VARCHAR(30) NOT NULL,
     postal_code VARCHAR(10) NOT NULL,
@@ -32,7 +44,7 @@ CREATE TABLE addresses (
     extra_address VARCHAR(255),
     delivery_memo VARCHAR(255),
     user_id INTEGER NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 comment on table addresses is '주소';
 comment on column addresses.recipient_name is '수신이/받는이';
@@ -44,50 +56,128 @@ comment on column addresses.extra_address is '추가 주소정보';
 comment on column addresses.delivery_memo is '배송메모';
 
 CREATE TABLE orders (
-    id serial PRIMARY KEY,
+    order_id serial PRIMARY KEY,
     status VARCHAR(255) NOT NULL,
     ordered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    total_price NUMERIC(10,2) NOT NULL,
+    order_price NUMERIC(10,2) NOT NULL,
+    discount_price NUMERIC(10,2) NOT NULL,
+    pay_price NUMERIC(10,2) NOT NULL,
     user_id INTEGER NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 comment on table orders is '주문';
-comment on column orders.status is 'idle, done, cancel, delivery';
+comment on column orders.status is '주문완료/준비중(ready), 배송중(delivery_start), 배송완료(delivery_finish), 구매확정(done), 환불/교환/취소요청(cancel), 환불/교환승인완료(return)';
 
 CREATE TABLE order_items (
-    id serial PRIMARY KEY,
+    order_items_id serial PRIMARY KEY,
     qty NUMERIC(10,2) NOT NULL,
     price NUMERIC(10,2) NOT NULL,
     order_id INTEGER NOT NULL,
-    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (order_id) REFERENCES orders(order_id),
     product_id INTEGER NOT NULL,
-    FOREIGN KEY (product_id) REFERENCES products(id)
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
+
+CREATE TABLE payments (
+  payment_id SERIAL PRIMARY KEY,
+  paied_at DATETIME,
+  total_price NUMERIC(10, 2) NOT NULL,
+  paied_price NUMERIC(10, 2) NOT NULL,
+  payment_method VARCHAR(255) NOT NULL,
+  user_id INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(user_id),
+  order_id INTEGER NOT NULL,
+  FOREIGN KEY (order_id) REFERENCES orders(order_id)
+);
+
+CREATE TABLE order_canceles (
+    order_cancel_id serial PRIMARY KEY,
+    status VARCHAR(255) NOT NULL,
+    canceled_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    total_price NUMERIC(10,2) NOT NULL,
+    cancel_commition NUMERIC(10,2) NOT NULL,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    order_id INTEGER NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id)
+);
+comment on table order_canceles is '주문취소';
+comment on column order_canceles.status is '요청(request), 완료(done), 거절(decline)';
+comment on column order_canceles.cancel_commition is '취소 수수료';
 
 CREATE TABLE categories (
-    id serial PRIMARY KEY,
+    category_id serial PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    description TEXT
+    image_url TEXT,
+    description TEXT,
+    deleted_at TIMESTAMP
 );
+comment on table categories is '카테고리(상품, 게시글)';
 
 CREATE TABLE products (
-    id serial PRIMARY KEY,
+    product_id serial PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     description TEXT,
     price NUMERIC(10,2) NOT NULL,
-    image_url TEXT
+    image_url TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
-CREATE TABLE categorory_product (
+CREATE TABLE product_categorory_mapping (
     category_id INTEGER REFERENCES categories(category_id),
-    product_id INTEGER REFERENCES articles(product_id),
-    CONSTRAINT category_product_pkey PRIMARY KEY (category_id, product_id)
+    product_id INTEGER REFERENCES products(product_id),
+    CONSTRAINT product_categorory_mapping_pkey PRIMARY KEY (product_id, category_id)
+);
+
+CREATE TABLE article_categorory_mapping (
+    category_id INTEGER REFERENCES categories(category_id),
+    article_id INTEGER REFERENCES articles(article_id),
+    CONSTRAINT article_categorory_mapping_pkey PRIMARY KEY (article_id, category_id)
 );
 
 CREATE TABLE articles (
-  id SERIAL PRIMARY KEY,
+  article_id SERIAL PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
   body TEXT NOT NULL,
-  user_id INTEGER NOT NULL REFERENCES users(id),
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  author_id INTEGER NOT NULL REFERENCES users(user_id),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  edited_at TIMESTAMP,
+  deleted_at TIMESTAMP
 );
+
+CREATE TABLE article_images (
+  article_image_id SERIAL PRIMARY KEY,
+  image_url TEXT,
+  seq INTEGER DEFAULT 1,
+  image_info TEXT NOT NULL,
+  article_id INTEGER REFERENCES products(article_id),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  edited_at TIMESTAMP,
+  deleted_at TIMESTAMP
+);
+comment on table article_images is '주문취소';
+comment on column article_images.image_info is '이미지 설명 문구';
+
+CREATE TABLE article_image_product_mapping (
+  article_image_product_mapping_id SERIAL PRIMARY KEY,
+  x integer NOT NULL DEFAULT 0,
+  y integer NOT NULL DEFAULT 0,
+  article_image_id INTEGER REFERENCES article_images(article_image_id),
+  product_id INTEGER REFERENCES products(product_id),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  edited_at TIMESTAMP,
+  deleted_at TIMESTAMP
+);
+
+CREATE TABLE comments (
+    comment_id serial PRIMARY KEY,
+    article_id INTEGER NOT NULL REFERENCES articles(article_id),
+    parent_id INTEGER REFERENCES comments(comment_id),
+    user_id INTEGER NOT NULL REFERENCES users(user_id),
+    comment_text TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- 추가되어야하는 테이블: 할인 쿠폰, 판매자, 적립금 
+
