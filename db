@@ -1,0 +1,71 @@
+-- make db
+CREATE DATABASE pozaang;
+
+-- make table
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  first_name VARCHAR(50),
+  last_name VARCHAR(50),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE address (
+    id serial PRIMARY KEY,
+    street_address VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL,
+    state VARCHAR(255) NOT NULL,
+    zip_code VARCHAR(255) NOT NULL,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- status: idle, done, cancel, delivery
+CREATE TABLE orders (
+    id serial PRIMARY KEY,
+    status VARCHAR(255) NOT NULL,
+    ordered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    total_price NUMERIC(10,2) NOT NULL,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE order_items (
+    id serial PRIMARY KEY,
+    qty NUMERIC(10,2) NOT NULL,
+    price NUMERIC(10,2) NOT NULL,
+    order_id INTEGER NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    product_id INTEGER NOT NULL,
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+CREATE TABLE categories (
+    id serial PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT
+);
+
+CREATE TABLE products (
+    id serial PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    description TEXT,
+    price NUMERIC(10,2) NOT NULL,
+    image_url TEXT
+);
+
+CREATE TABLE categorory_product (
+    category_id INTEGER REFERENCES categories(category_id),
+    product_id INTEGER REFERENCES articles(product_id),
+    PRIMARY KEY (category_id, product_id)
+);
+
+CREATE TABLE articles (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  body TEXT NOT NULL,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
