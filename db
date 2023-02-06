@@ -205,5 +205,5 @@ CREATE TABLE coupon_users (
   order_id INTEGER REFERENCES orders(order_id)
 );
 
--- 추가되어야하는 테이블: 판매자
+-- 추가되어야하는 테이블: 판매자, 중간 정산, 통계, 사진별 좋아요 수, 
 
