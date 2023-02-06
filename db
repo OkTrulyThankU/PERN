@@ -123,6 +123,8 @@ CREATE TABLE products (
     description TEXT,
     price NUMERIC(10,2) NOT NULL,
     image_url TEXT,
+    seller_id INTEGER NOT NULL,
+    FOREIGN KEY (seller_id) REFERENCES users(user_id),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP
 );
@@ -182,5 +184,26 @@ CREATE TABLE comments (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- 추가되어야하는 테이블: 할인 쿠폰, 판매자, 적립금 
+CREATE TABLE coupons (
+  coupon_id serial PRIMARY KEY,
+  code_rule VARCHAR(255),
+  name VARCHAR(255),
+  condition TEXT,
+  discount NUMERIC(5, 2) NOT NULL,
+  expiration_date_condition VARCHAR(255),
+  is_active BOOLEAN NOT NULL DEFAULT true
+);
+
+CREATE TABLE coupon_users (
+  coupon_user_id SERIAL PRIMARY KEY,
+  code TEXT PRIMARY KEY,
+  discount NUMERIC(5, 2) NOT NULL,
+  expiration_date DATE NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  coupon_id INTEGER REFERENCES coupons(coupon_id),
+  user_id INTEGER REFERENCES users(user_id),
+  order_id INTEGER REFERENCES orders(order_id)
+);
+
+-- 추가되어야하는 테이블: 판매자
 
