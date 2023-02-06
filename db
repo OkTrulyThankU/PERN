@@ -8,19 +8,19 @@ $ set client_encoding = 'UTF8'
 CREATE DATABASE pozaang;
 
 -- make table
-CREATE TABLE users (
-  user_id SERIAL PRIMARY KEY,
-  username VARCHAR(50) NOT NULL UNIQUE,
+CREATE TABLE people (
+  person_id SERIAL PRIMARY KEY,
+  person_name VARCHAR(50) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
   first_name VARCHAR(50),
   last_name VARCHAR(50),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-comment on table users is '사용자';
-comment on column users.email is '이메일';
-comment on column users.first_name is '이름';
-comment on column users.last_name is '성';
+comment on table people is '사용자';
+comment on column people.email is '이메일';
+comment on column people.first_name is '이름';
+comment on column people.last_name is '성';
 
 CREATE TABLE preferences (
     preference_id serial PRIMARY KEY,
