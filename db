@@ -1,3 +1,9 @@
+-- 한글 깨짐 방지
+$ show server_encoding
+$ show client_encoding
+$ set server_encoding = 'UTF8'
+$ set client_encoding = 'UTF8' 
+
 -- make db
 CREATE DATABASE pozaang;
 
@@ -11,18 +17,32 @@ CREATE TABLE users (
   last_name VARCHAR(50),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+comment on table users is '사용자';
+comment on column users.email is '이메일';
+comment on column users.first_name is '이름';
+comment on column users.last_name is '성';
 
-CREATE TABLE address (
+CREATE TABLE addresses (
     id serial PRIMARY KEY,
-    street_address VARCHAR(255) NOT NULL,
-    city VARCHAR(255) NOT NULL,
-    state VARCHAR(255) NOT NULL,
-    zip_code VARCHAR(255) NOT NULL,
+    recipient_name VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(30) NOT NULL,
+    postal_code VARCHAR(10) NOT NULL,
+    road_address VARCHAR(255) NOT NULL,
+    detail_address VARCHAR(255) NOT NULL,
+    extra_address VARCHAR(255),
+    delivery_memo VARCHAR(255),
     user_id INTEGER NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
+comment on table addresses is '주소';
+comment on column addresses.recipient_name is '수신이/받는이';
+comment on column addresses.phone_number is '연락처';
+comment on column addresses.postal_code is '우편번호';
+comment on column addresses.road_address is '도로명주소';
+comment on column addresses.detail_address is '상세주소';
+comment on column addresses.extra_address is '추가 주소정보';
+comment on column addresses.delivery_memo is '배송메모';
 
--- status: idle, done, cancel, delivery
 CREATE TABLE orders (
     id serial PRIMARY KEY,
     status VARCHAR(255) NOT NULL,
@@ -31,6 +51,8 @@ CREATE TABLE orders (
     user_id INTEGER NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
+comment on table orders is '주문';
+comment on column orders.status is 'idle, done, cancel, delivery';
 
 CREATE TABLE order_items (
     id serial PRIMARY KEY,
@@ -59,7 +81,7 @@ CREATE TABLE products (
 CREATE TABLE categorory_product (
     category_id INTEGER REFERENCES categories(category_id),
     product_id INTEGER REFERENCES articles(product_id),
-    PRIMARY KEY (category_id, product_id)
+    CONSTRAINT category_product_pkey PRIMARY KEY (category_id, product_id)
 );
 
 CREATE TABLE articles (
